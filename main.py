@@ -180,7 +180,7 @@ def build_ensemble_model(shape, NUM_CLASSES):
     :return: The ensemble model
     """
     model = Sequential()
-    model.add(Input(shape=shape))
+    model.add(Input(shape=(shape[1])))
     model.add(Dense(512, kernel_initializer=glorot_uniform(seed=0), name='fc1'))
     model.add(Activation('relu', name='fc1_act'))
     model.add(Dropout(0.5, name='fc1_dropout'))
