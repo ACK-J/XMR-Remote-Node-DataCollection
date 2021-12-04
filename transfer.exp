@@ -1,0 +1,48 @@
+#!/usr/bin/expect -f
+
+
+set force_conservative 0  ;# set to 1 to force conservative mode even if
+			  ;# script wasn't run conservatively originally
+if {$force_conservative} {
+	set send_slow {1 .1}
+	proc send {ignore arg} {
+		sleep .1
+		exp_send -s -- $arg
+	}
+}
+
+#
+# 2) differing output - Some programs produce different output each time
+# they run.  The "date" command is an obvious example.  Another is
+# ftp, if it produces throughput statistics at the end of a file
+# transfer.  If this causes a problem, delete these patterns or replace
+# them with wildcards.  An alternative is to use the -p flag (for
+# "prompt") which makes Expect only look for the last line of output
+# (i.e., the prompt).  The -P flag allows you to define a character to
+# toggle this mode off and on.
+#
+# Read the man page for more info.
+#
+# -Don
+
+
+set timeout -1
+spawn monero-wallet-cli --testnet --wallet ../Jack-Wallet --daemon-address testnet.xmr-tw.org:28081
+match_max 100000
+expect "This is the command line monero wallet. It needs to connect to a monero\r
+daemon to work correctly.\r
+WARNING: Do not reuse your Monero keys on another fork, UNLESS this fork has key reuse mitigations built in. Doing so will harm your privacy.\r
+\r
+Monero 'Oxygen Orion' (v0.17.3.0-72e778a04)\r
+Logging to monero-wallet-cli.log\r
+Wallet password: "
+send -- "\r"
+expect "*9snFGd]*"
+send -- "transfer 9zniaiucUsy61kWT4x1QTcf2wKDqRLsX5JKKbkSuRrRBMuuMjk7MjdoitAxv9wDPyxVPAc9ZR37UjBgesou5s6oJQmSdx6X  0.03\r"
+expect "*Is this okay?  (Y/Yes/N/No): *"
+send -- "y\r"
+expect "*9snFGd]*"
+send -- "unspent_outputs\r"
+expect "*9snFGd]*"
+send -- "exit\r"
+expect eof
